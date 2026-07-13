@@ -4,7 +4,7 @@ const GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbwo0dQ88zwPXD
 // --- STATE DATA ---
 let dataMahasiswa = [], dataDosen = [], dataMatkul = [], dataNilai = [];
 
-// --- FUNGSI NAVIGASI MOBILE ---
+// --- FUNGSI NAVIGASI & MOBILE ---
 window.toggleMobileSidebar = () => {
     const sidebar = document.getElementById('sidebar');
     const backdrop = document.getElementById('mobileBackdrop');
@@ -72,15 +72,55 @@ window.bukaModalTranskrip = function(nim) {
     const nilai = dataNilai.filter(n => n.nim == nim);
     document.getElementById('modalNamaMhs').innerText = mhs ? mhs.nama : '-';
     document.getElementById('modalNimMhs').innerText = nim;
+    
     const total = nilai.reduce((s, n) => s + parseFloat(n.nilaiAngka || 0), 0);
     document.getElementById('modalIpkMhs').innerText = nilai.length > 0 ? ((total / nilai.length) / 100 * 4).toFixed(2) : "0.00";
+    
     const tbody = document.getElementById('modalTabelNilaiBody');
     tbody.innerHTML = '';
-    nilai.forEach(n => tbody.innerHTML += `<tr><td class="py-3 px-4 border-b">${n.kodeMatkul}</td><td class="py-3 px-4 border-b">${n.matakuliah}</td><td class="py-3 px-4 border-b text-center">${n.sks}</td><td class="py-3 px-4 border-b text-center">${n.nilaiAngka}</td><td class="py-3 px-4 border-b text-center font-bold">${n.nilaiHuruf}</td><td class="py-3 px-4 border-b text-center"><button onclick="hapusData('${n.id}', 'Input Nilai')" class="text-red-500">Hapus</button></td></tr>`);
+    nilai.forEach(n => {
+        tbody.innerHTML += `
+            <tr class="text-slate-600">
+                <td class="py-2 px-2 border-b text-xs">${n.kodeMatkul}</td>
+                <td class="py-2 px-2 border-b text-xs truncate max-w-[100px]">${n.matakuliah}</td>
+                <td class="py-2 px-2 border-b text-center text-xs">${n.sks}</td>
+                <td class="py-2 px-2 border-b text-center text-xs">${n.nilaiAngka}</td>
+                <td class="py-2 px-2 border-b text-center font-bold text-xs">${n.nilaiHuruf}</td>
+                <td class="py-2 px-2 border-b text-center">
+                    <button onclick="hapusData('${n.id}', 'Input Nilai')" class="text-red-500 text-xs font-bold">Hapus</button>
+                </td>
+            </tr>`;
+    });
     document.getElementById('modalTranskrip').classList.remove('hidden');
 };
 
-window.cetakPDF = () => { document.getElementById('printDate').innerText = new Date().toLocaleDateString(); window.print(); };
+// Fungsi cetak yang diperbarui
+window.cetakPDF = () => { 
+    document.getElementById('printDate').innerText = new Date().toLocaleDateString(); 
+    
+    // Injeksi style khusus sementara agar print merender modal sebagai halaman penuh tanpa kolom aksi
+    const style = document.createElement('style');
+    style.innerHTML = `
+        @media print {
+            body > *:not(main) { display: none !important; }
+            main > div[id^="section"] { display: none !important; }
+            #modalTranskrip { display: block !important; position: static !important; background: transparent !important; padding: 0 !important; }
+            #modalTranskrip > div { box-shadow: none !important; max-width: 100% !important; max-height: none !important; border: none !important; }
+            #modalTranskrip > div > div:first-child, #modalTranskrip > div > div:last-child { display: none !important; }
+            #modalTranskrip .overflow-y-auto, #modalTranskrip .overflow-x-auto { overflow: visible !important; }
+            #modalTranskrip table th:nth-child(6), #modalTranskrip table td:nth-child(6) { display: none !important; }
+        }
+    `;
+    document.head.appendChild(style);
+    
+    const modal = document.getElementById('modalTranskrip');
+    modal.classList.remove('print:hidden');
+    
+    window.print();
+    
+    modal.classList.add('print:hidden');
+    document.head.removeChild(style);
+};
 
 // --- DATA & DROPDOWN ---
 function updateDropdowns() {
@@ -127,7 +167,7 @@ function renderTabelMatkul() {
     dataMatkul.forEach(m => tbody.innerHTML += `<tr><td class="py-4 px-6">${m.kode}</td><td class="py-4 px-6">${m.nama}</td><td class="py-4 px-6">${m.namaDosen}</td><td class="py-4 px-6 text-center">${m.sks} SKS</td><td class="py-4 px-6 text-center"><button onclick="hapusData('${m.id}', 'Master Matkul')" class="text-red-500">Hapus</button></td></tr>`);
 }
 
-// --- EVENT LISTENERS ---
+// --- EVENT LISTENERS & SWITCH MENU ---
 document.getElementById('formMahasiswa').addEventListener('submit', async(e) => { e.preventDefault(); await sendToGoogleSheets('data_mahasiswa', { id: Date.now(), nim: document.getElementById('nim').value, nama: document.getElementById('nama').value, jurusan: document.getElementById('jurusan').value, angkatan: document.getElementById('angkatan').value }); tutupModalFormMhs(); await ambilData(); });
 document.getElementById('formDosen').addEventListener('submit', async(e) => { e.preventDefault(); await sendToGoogleSheets('data_dosen', { id: Date.now(), nidn: document.getElementById('nidn').value, nama: document.getElementById('namaDosen').value, keahlian: document.getElementById('keahlian').value }); tutupModalFormDosen(); await ambilData(); });
 document.getElementById('formMatkul').addEventListener('submit', async(e) => { e.preventDefault(); await sendToGoogleSheets('master_matkul', { id: Date.now(), kode: document.getElementById('kodeMatkul').value, nama: document.getElementById('namaMatkul').value, sks: document.getElementById('bobotSks').value, namaDosen: document.getElementById('dosenPengampu').value }); tutupModalFormMatkul(); await ambilData(); });
@@ -139,10 +179,8 @@ window.switchMenu = (menu) => {
     ['sectionDashboard', 'sectionMahasiswa', 'sectionDosen', 'sectionMatkul', 'sectionAkademik'].forEach(id => document.getElementById(id).classList.add('hidden'));
     document.getElementById(`section${menu.charAt(0).toUpperCase() + menu.slice(1)}`).classList.remove('hidden');
     
-    // Tutup sidebar di mobile setelah klik
     if (window.innerWidth < 768) toggleMobileSidebar();
 
-    // Reset dan aktifkan warna tombol
     const menus = ['Dashboard', 'Mahasiswa', 'Dosen', 'Matkul', 'Akademik'];
     menus.forEach(m => {
         const btn = document.getElementById(`menu${m}Btn`);
