@@ -79,7 +79,7 @@ window.bukaModalTranskrip = function(nim) {
     const tbody = document.getElementById('modalTabelNilaiBody');
     tbody.innerHTML = '';
     nilai.forEach(n => {
-        // PERBAIKAN: Tarik kode dan sks dari Master Data Matkul berdasarkan nama matakuliah
+        // Tarik kode dan sks dari Master Data Matkul berdasarkan nama matakuliah
         const infoMatkul = dataMatkul.find(m => m.nama === n.matakuliah) || {};
         const kode = infoMatkul.kode || '-';
         const sks = infoMatkul.sks || '-';
@@ -105,7 +105,7 @@ window.bukaModalTranskrip = function(nim) {
     document.getElementById('modalTranskrip').classList.remove('hidden');
 };
 
-// Fungsi cetak yang diperbarui
+// --- FUNGSI CETAK PDF (Fix Rendering di Mobile) ---
 window.cetakPDF = () => { 
     document.getElementById('printDate').innerText = new Date().toLocaleDateString(); 
     
@@ -115,11 +115,11 @@ window.cetakPDF = () => {
         @media print {
             body > *:not(main) { display: none !important; }
             main > div[id^="section"] { display: none !important; }
-            #modalTranskrip { display: block !important; position: static !important; background: transparent !important; padding: 0 !important; }
-            #modalTranskrip > div { box-shadow: none !important; max-width: 100% !important; max-height: none !important; border: none !important; }
+            #modalTranskrip { display: block !important; position: static !important; background: white !important; padding: 0 !important; }
+            #modalTranskrip > div { box-shadow: none !important; max-width: 100% !important; max-height: none !important; border: none !important; width: 100% !important; }
             #modalTranskrip > div > div:first-child, #modalTranskrip > div > div:last-child { display: none !important; }
-            #modalTranskrip .overflow-y-auto, #modalTranskrip .overflow-x-auto { overflow: visible !important; }
-            /* Menyembunyikan kolom aksi (sekarang berada di kolom ke-12) */
+            #modalTranskrip .overflow-y-auto, #modalTranskrip .overflow-x-auto { overflow: visible !important; display: block !important; }
+            /* Menyembunyikan kolom aksi (berada di kolom ke-12) */
             #modalTranskrip table th:nth-child(12), #modalTranskrip table td:nth-child(12) { display: none !important; }
         }
     `;
@@ -128,10 +128,14 @@ window.cetakPDF = () => {
     const modal = document.getElementById('modalTranskrip');
     modal.classList.remove('print:hidden');
     
-    window.print();
-    
-    modal.classList.add('print:hidden');
-    document.head.removeChild(style);
+    // Beri jeda 500ms agar browser (terutama HP) sempat menerapkan CSS sebelum dialog print muncul
+    setTimeout(() => {
+        window.print();
+        
+        // Kembalikan seperti semula setelah layar print ditutup/selesai
+        modal.classList.add('print:hidden');
+        document.head.removeChild(style);
+    }, 500);
 };
 
 // --- DATA & DROPDOWN ---
@@ -196,7 +200,7 @@ function cekNilaiSekarang() {
         const existing = dataNilai.find(n => n.nim == nim && n.matakuliah == matkul);
         if (existing && existing[kategori] !== undefined && existing[kategori] !== "") {
             inputBox.value = existing[kategori];
-            infoBox.innerHTML = `update nilai <b>${kategori.toUpperCase()}</b>. Nilai saat ini: <b>${existing[kategori]}</b>`;
+            infoBox.innerHTML = `Mupdate nilai <b>${kategori.toUpperCase()}</b>. Nilai saat ini: <b>${existing[kategori]}</b>`;
             infoBox.classList.remove('hidden');
         } else {
             inputBox.value = "";
