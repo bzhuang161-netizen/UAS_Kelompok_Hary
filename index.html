@@ -1,689 +1,384 @@
 <!DOCTYPE html>
-
 <html lang="id">
-
 <head>
-
   <meta charset="UTF-8">
-
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
   <title>Sistem Informasi Akademik</title>
-
   <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-
   <style>
-
     @keyframes slideIn {
-
       from { transform: translateY(-20px); opacity: 0; }
-
       to { transform: translateY(0); opacity: 1; }
-
     }
-
     @keyframes slideDown {
-
       from { transform: translateY(-15px); opacity: 0; }
-
       to { transform: translateY(0); opacity: 1; }
-
     }
-
   </style>
-
 </head>
-
 <body class="bg-slate-50 min-h-screen flex flex-col md:flex-row text-slate-800 antialiased selection:bg-blue-500 selection:text-white print:bg-white print:text-black">
-
-
 
   <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-3 print:hidden"></div>
 
-
-
   <!-- HEADER MOBILE (Hanya tampil di HP) -->
-
   <header class="bg-blue-600 text-white px-4 h-16 flex justify-between items-center md:hidden shadow-md print:hidden relative z-50">
-
     <h1 class="text-lg font-bold tracking-wide flex items-center gap-2">
-
       <span class="inline-flex items-center justify-center w-8 h-8 bg-blue-800 rounded-lg shadow-md shadow-blue-900/30">
-
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M3 10.5L12 3l9 7.5"/><path d="M5 10.5V21h14V10.5"/><path d="M9 21v-7h6v7"/></svg>
-
       </span>SIAKAD
-
     </h1>
-
     <button onclick="toggleMobileSidebar()" class="text-white p-1 rounded-md focus:outline-none cursor-pointer hover:bg-blue-700 transition-colors">
-
       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" /></svg>
-
     </button>
-
   </header>
 
-
-
   <!-- OVERLAY MOBILE (Backdrop gelap saat menu terbuka) -->
-
   <div id="mobileBackdrop" onclick="toggleMobileSidebar()" class="fixed inset-0 top-16 bg-slate-900/60 backdrop-blur-sm z-40 hidden md:hidden transition-opacity"></div>
 
-
-
   <!-- SIDEBAR NAVIGATION -->
-
   <aside id="sidebar" class="w-full md:w-64 bg-slate-900 text-white flex-col shadow-xl transition-all duration-300 shrink-0 z-50 md:z-30 hidden md:flex md:static print:hidden">
-
     <!-- Bagian Logo Header Sidebar (Hanya tampil di Desktop) -->
-
     <div class="hidden md:flex p-5 border-b border-slate-800 bg-slate-950 justify-between items-center h-[73px]">
-
       <div id="sidebarTitle" class="flex items-center gap-3 overflow-hidden whitespace-nowrap transition-all duration-300">
-
         <span class="inline-flex items-center justify-center w-9 h-9 bg-blue-600 rounded-lg shadow-md shadow-blue-500/30">
-
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M3 10.5L12 3l9 7.5"/><path d="M5 10.5V21h14V10.5"/><path d="M9 21v-7h6v7"/></svg>
-
         </span>
-
         <span class="font-bold tracking-wide text-lg text-white">SIAKAD</span>
-
       </div>
-
       <button onclick="toggleSidebar()" class="bg-slate-800 text-slate-300 hover:text-white cursor-pointer focus:outline-none p-1.5 rounded-lg hover:bg-blue-600 transition flex items-center justify-center">
-
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" /></svg>
-
       </button>
-
     </div>
-
-   
-
+    
     <!-- Menu Links -->
-
     <nav class="flex-1 p-3 space-y-1.5 overflow-x-hidden">
-
       <button id="menuDashboardBtn" onclick="switchMenu('dashboard')" class="w-full flex items-center space-x-3 px-4 py-3 rounded-lg bg-blue-600 text-white font-medium cursor-pointer transition text-left border-l-4 border-blue-400 group shadow-md shadow-blue-500/20"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 shrink-0 text-white group-hover:scale-110 transition duration-200"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 14.25v2.25m3-4.5v4.5m3-6.75v6.75m3-9v9M6 20.25h12A2.25 2.25 0 0 0 20.25 18V6A2.25 2.25 0 0 0 18 3.75H6A2.25 2.25 0 0 0 3.75 6v12A2.25 2.25 0 0 0 6 20.25Z" /></svg><span class="menu-text transition-all duration-300">Dashboard</span></button>
-
       <button id="menuMahasiswaBtn" onclick="switchMenu('mahasiswa')" class="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white font-medium cursor-pointer transition text-left border-l-4 border-transparent group"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 shrink-0 group-hover:scale-110 transition duration-200"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" /></svg><span class="menu-text transition-all duration-300">Data Mahasiswa</span></button>
-
       <button id="menuDosenBtn" onclick="switchMenu('dosen')" class="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white font-medium cursor-pointer transition text-left border-l-4 border-transparent group"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 shrink-0 group-hover:scale-110 transition duration-200"><path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147a60.438 60.438 0 0 0-.491 6.347A48.62 48.62 0 0 1 12 20.904a48.62 48.62 0 0 1 8.232-4.41 60.46 60.46 0 0 0-.491-6.347m-15.482 0a50.636 50.636 0 0 0-2.658-.813A59.906 59.906 0 0 1 12 3.493a59.903 59.903 0 0 1 10.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.717 50.717 0 0 1 12 13.489a50.702 50.702 0 0 1 7.74-3.342M6.75 15a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm0 0v-3.675A55.378 55.378 0 0 1 12 8.443m-7.007 11.55A5.981 5.981 0 0 0 6.75 15.75v-1.5" /></svg><span class="menu-text transition-all duration-300">Data Dosen</span></button>
-
       <button id="menuMatkulBtn" onclick="switchMenu('matkul')" class="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white font-medium cursor-pointer transition text-left border-l-4 border-transparent group"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 shrink-0 group-hover:scale-110 transition duration-200"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-16.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-16.25v14.25" /></svg><span class="menu-text transition-all duration-300">Mata Kuliah</span></button>
-
       <button id="menuAkademikBtn" onclick="switchMenu('akademik')" class="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white font-medium cursor-pointer transition text-left border-l-4 border-transparent group"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 shrink-0 group-hover:scale-110 transition duration-200"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" /></svg><span class="menu-text transition-all duration-300">Input Nilai</span></button>
-
     </nav>
-
     <div id="sidebarFooter" class="p-4 border-t border-slate-800 text-center text-xs text-slate-500 bg-slate-950 whitespace-nowrap overflow-hidden transition-all">SIAKAD Pro v6.3</div>
-
   </aside>
 
-
-
   <main class="flex-1 p-6 md:p-8 overflow-y-auto w-full print:p-0">
-
-   
-
+    
     <div class="hidden print:block text-center mb-8 border-b-2 border-slate-800 pb-4">
-
       <h1 class="text-2xl font-bold uppercase tracking-widest text-blue-700">SISTEM INFORMASI AKADEMIK</h1>
-
       <p class="text-lg">Laporan Transkrip Nilai Mahasiswa Resmi</p>
-
       <p class="text-sm text-slate-500 mt-1">Dicetak pada: <span id="printDate"></span></p>
-
     </div>
-
-
 
     <!-- DASHBOARD -->
-
     <div id="sectionDashboard" class="space-y-6 block print:hidden">
-
       <div class="border-b pb-3 border-slate-200">
-
         <h2 class="text-2xl font-bold text-slate-900">Ringkasan Akademik</h2>
-
         <p class="text-sm text-slate-500">Gambaran umum data statistik perkuliahan saat ini.</p>
-
       </div>
-
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5">
-
         <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 flex items-center space-x-4 hover:shadow-md transition">
-
           <div class="p-3 bg-blue-50 text-blue-700 rounded-lg"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><path d="M20 21v-2a4 4 0 0 0-3-3.87"/><path d="M17 3.13a4 4 0 0 1 0 7.75"/></svg></div>
-
           <div><p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Total Mahasiswa</p><h3 id="dashTotalMhs" class="text-2xl font-bold text-slate-900 mt-0.5">0</h3></div>
-
         </div>
-
         <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 flex items-center space-x-4 hover:shadow-md transition">
-
           <div class="p-3 bg-blue-50 text-blue-600 rounded-lg"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="8.5" cy="7" r="4" /><polyline points="17 11 19 13 23 9" /></svg></div>
-
           <div><p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Total Dosen</p><h3 id="dashTotalDosen" class="text-2xl font-bold text-slate-900 mt-0.5">0</h3></div>
-
         </div>
-
         <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 flex items-center space-x-4 hover:shadow-md transition">
-
           <div class="p-3 bg-blue-50 text-blue-600 rounded-lg"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5z"/></svg></div>
-
           <div><p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Total Matkul</p><h3 id="dashTotalMatkul" class="text-2xl font-bold text-slate-900 mt-0.5">0</h3></div>
-
         </div>
-
         <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 flex items-center space-x-4 hover:shadow-md transition">
-
           <div class="p-3 bg-blue-50 text-blue-600 rounded-lg"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></div>
-
           <div><p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Nilai Diinput</p><h3 id="dashTotalNilai" class="text-2xl font-bold text-slate-900 mt-0.5">0</h3></div>
-
         </div>
-
         <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 flex items-center space-x-4 hover:shadow-md transition">
-
           <div class="p-3 bg-blue-50 text-blue-600 rounded-lg"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><path d="M22 10L12 4 2 10l10 6 10-6Z"/><path d="M6 12v6c0 1 6 3 6 3s6-2 6-3v-6"/></svg></div>
-
           <div><p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Rata-rata IPK</p><h3 id="dashRataIPK" class="text-2xl font-bold text-slate-900 mt-0.5">0.00</h3></div>
-
         </div>
-
       </div>
-
       <div class="bg-gradient-to-r from-blue-700 to-blue-500 text-white p-6 rounded-2xl shadow-md">
-
         <h3 class="text-lg font-bold">Sistem Relasional Akademik Aktif</h3>
-
         <p class="text-blue-100 text-sm mt-1 max-w-2xl">Sistem kini telah dilengkapi manajemen Master Data Dosen yang terelasi penuh dengan Master Mata Kuliah dan Input Nilai sesuai standar sistem akademik terpadu.</p>
-
       </div>
-
     </div>
-
-
 
     <!-- MAHASISWA -->
-
     <div id="sectionMahasiswa" class="hidden">
-
       <div class="flex justify-between items-center mb-6 print:hidden">
-
         <div>
-
           <h2 class="text-xl font-bold text-slate-900">Daftar Mahasiswa Aktif</h2>
-
           <p class="text-sm text-slate-500">Kelola seluruh data mahasiswa yang terdaftar di sistem.</p>
-
         </div>
-
         <button onclick="bukaModalFormMhs()" class="bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition shadow-md shadow-blue-500/30 flex items-center gap-2 cursor-pointer">
-
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
-
           <span class="hidden sm:inline">Tambah Mahasiswa</span><span class="sm:hidden">Tambah</span>
-
         </button>
-
       </div>
-
       <div class="bg-white w-full rounded-xl shadow-sm border border-slate-200 overflow-x-auto print:border-none print:shadow-none print:p-0">
-
         <table class="min-w-full bg-white rounded-lg overflow-hidden print:border-collapse">
-
           <thead class="bg-slate-50 text-slate-700 text-left text-xs uppercase border-b border-slate-100 print:bg-slate-200 print:text-black">
-
             <tr>
-
               <th class="py-4 px-6 print:border print:border-slate-300">NIM</th>
-
               <th class="py-4 px-6 print:border print:border-slate-300">Nama</th>
-
               <th class="py-4 px-6 print:border print:border-slate-300">Jurusan</th>
-
               <th class="py-4 px-6 text-center print:border print:border-slate-300">IPK</th>
-
               <th class="py-4 px-6 text-center print:hidden">Aksi</th>
-
             </tr>
-
           </thead>
-
           <tbody id="tabelMahasiswaBody" class="divide-y divide-slate-100 text-slate-600 text-sm print:text-black"></tbody>
-
         </table>
-
       </div>
-
     </div>
-
-
 
     <!-- DOSEN -->
-
     <div id="sectionDosen" class="hidden">
-
       <div class="flex justify-between items-center mb-6 print:hidden">
-
         <div>
-
           <h2 class="text-xl font-bold text-slate-900">Daftar Dosen Pengajar</h2>
-
           <p class="text-sm text-slate-500">Kelola seluruh data tenaga pengajar (dosen).</p>
-
         </div>
-
         <button onclick="bukaModalFormDosen()" class="bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition shadow-md shadow-blue-500/30 flex items-center gap-2 cursor-pointer">
-
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
-
           <span class="hidden sm:inline">Tambah Dosen</span><span class="sm:hidden">Tambah</span>
-
         </button>
-
       </div>
-
       <div class="bg-white w-full rounded-xl shadow-sm border border-slate-200 overflow-x-auto print:border-none print:shadow-none print:p-0">
-
         <table class="min-w-full bg-white rounded-lg overflow-hidden print:border-collapse">
-
           <thead class="bg-slate-50 text-slate-700 text-left text-xs uppercase border-b border-slate-100 print:bg-slate-200 print:text-black">
-
             <tr>
-
               <th class="py-4 px-6 print:border print:border-slate-300">NIDN</th>
-
               <th class="py-4 px-6 print:border print:border-slate-300">Nama Dosen</th>
-
               <th class="py-4 px-6 print:border print:border-slate-300">Bidang Keahlian</th>
-
               <th class="py-4 px-6 text-center print:hidden">Aksi</th>
-
             </tr>
-
           </thead>
-
           <tbody id="tabelDosenBody" class="divide-y divide-slate-100 text-slate-600 text-sm print:text-black"></tbody>
-
         </table>
-
       </div>
-
     </div>
-
-   
-
+    
     <!-- MATKUL -->
-
     <div id="sectionMatkul" class="hidden">
-
       <div class="flex justify-between items-center mb-6 print:hidden">
-
         <div>
-
           <h2 class="text-xl font-bold text-slate-900">Daftar Mata Kuliah</h2>
-
           <p class="text-sm text-slate-500">Kelola master data mata kuliah beserta dosen pengampunya.</p>
-
         </div>
-
         <button onclick="bukaModalFormMatkul()" class="bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition shadow-md shadow-blue-500/30 flex items-center gap-2 cursor-pointer">
-
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
-
           <span class="hidden sm:inline">Tambah Matkul</span><span class="sm:hidden">Tambah</span>
-
         </button>
-
       </div>
-
       <div class="bg-white w-full rounded-xl shadow-sm border border-slate-200 overflow-x-auto print:border-none print:shadow-none print:p-0">
-
         <table class="min-w-full bg-white rounded-lg overflow-hidden print:border-collapse">
-
           <thead class="bg-slate-50 text-slate-700 text-left text-xs uppercase border-b border-slate-100 print:bg-slate-200 print:text-black">
-
             <tr>
-
               <th class="py-4 px-6 print:border print:border-slate-300">Kode</th>
-
               <th class="py-4 px-6 print:border print:border-slate-300">Nama Mata Kuliah</th>
-
               <th class="py-4 px-6 print:border print:border-slate-300">Dosen Pengampu</th>
-
               <th class="py-4 px-6 text-center print:border print:border-slate-300">SKS</th>
-
               <th class="py-4 px-6 text-center print:hidden">Aksi</th>
-
             </tr>
-
           </thead>
-
           <tbody id="tabelMatkulBody" class="divide-y divide-slate-100 text-slate-600 text-sm print:text-black"></tbody>
-
         </table>
-
       </div>
-
     </div>
 
-
-
-    <!-- INPUT NILAI (KHUSUS FORM) -->
-
+    <!-- INPUT NILAI (KHUSUS FORM BERTAHAP) -->
     <div id="sectionAkademik" class="hidden">
-
-      <div class="max-w-2xl mx-auto bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-200 mt-4">
-
+      <div class="max-w-3xl mx-auto bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-200 mt-4">
         <div class="text-center mb-8 border-b border-slate-100 pb-6">
-
           <div class="inline-flex items-center justify-center w-12 h-12 bg-blue-100 text-blue-600 rounded-full mb-3">
-
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" /></svg>
-
           </div>
-
-          <h2 id="formTitleAkademik" class="text-2xl font-bold text-slate-900">Form Input Nilai</h2>
-
-          <p class="text-slate-500 text-sm mt-1">Masukkan nilai angka mata kuliah, sistem akan otomatis mengonversinya menjadi huruf dan menghitung ulang IPK.</p>
-
+          <h2 id="formTitleAkademik" class="text-2xl font-bold text-slate-900">Form Input Nilai Bertahap</h2>
+          <p class="text-slate-500 text-sm mt-1">Pilih komponen nilai yang ingin diinput (Tugas, Kuis, UTS, atau UAS). Sistem akan otomatis menghitung ulang nilai akhir.</p>
         </div>
-
         <form id="formAkademik" class="space-y-5">
-
-          <div>
-
-            <label class="block text-sm font-semibold text-slate-700 mb-1">Mahasiswa</label>
-
-            <select id="selectMhs" required class="w-full p-3 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-slate-50 transition disabled:bg-gray-100"></select>
-
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-semibold text-slate-700 mb-1">Mahasiswa</label>
+              <select id="selectMhs" required class="w-full p-3 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50 transition">
+                <!-- Opsi dirender JS -->
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-slate-700 mb-1">Mata Kuliah</label>
+              <select id="selectMatkul" required class="w-full p-3 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50 transition">
+                <!-- Opsi dirender JS -->
+              </select>
+            </div>
+          </div>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-slate-100 pt-5">
+            <div>
+              <label class="block text-sm font-semibold text-slate-700 mb-1">Komponen Nilai</label>
+              <select id="kategoriNilai" required class="w-full p-3 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50 transition">
+                <option value="" disabled selected>-- Pilih Komponen yang Ingin Diinput --</option>
+                <option value="t1">Tugas 1</option>
+                <option value="t2">Tugas 2</option>
+                <option value="k1">Kuis 1</option>
+                <option value="k2">Kuis 2</option>
+                <option value="uts">UTS</option>
+                <option value="uas">UAS</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-slate-700 mb-1">Nilai Angka (0 - 100)</label>
+              <input type="number" id="inputNilaiAngka" min="0" max="100" required class="w-full p-3 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50 transition" placeholder="Contoh: 85">
+            </div>
           </div>
 
-          <div>
-
-            <label class="block text-sm font-semibold text-slate-700 mb-1">Mata Kuliah</label>
-
-            <select id="selectMatkul" required class="w-full p-3 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-slate-50 transition disabled:bg-gray-100"></select>
-
-          </div>
-
-          <div>
-
-            <label class="block text-sm font-semibold text-slate-700 mb-1">Nilai Angka (0 - 100)</label>
-
-            <input type="number" id="nilaiAngka" min="0" max="100" required class="w-full p-3 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-slate-50 transition" placeholder="Contoh: 85">
-
+          <!-- Indikator Data -->
+          <div id="infoStatusNilai" class="hidden text-sm px-4 py-3 rounded-lg bg-blue-50 text-blue-700 border border-blue-100">
+            <!-- Teks otomatis dari JS -->
           </div>
 
           <div class="flex gap-3 pt-4 border-t border-slate-100">
-
             <button type="submit" id="btnSubmitAkademik" class="flex-1 bg-blue-600 text-white py-3 rounded-xl hover:bg-blue-700 transition font-bold cursor-pointer shadow-lg shadow-blue-500/30 text-lg">Simpan Nilai</button>
-
-            <button type="button" id="btnCancelAkademik" onclick="cancelEditAkademik()" class="hidden flex-1 bg-slate-100 text-slate-700 py-3 rounded-xl hover:bg-slate-200 transition font-bold cursor-pointer text-lg">Batal Edit</button>
-
           </div>
-
         </form>
-
       </div>
-
     </div>
-
-
 
     <!-- MODAL POP-UP FORM MAHASISWA -->
-
     <div id="modalFormMhs" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 print:hidden transition-opacity">
-
       <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col animate-[slideIn_0.3s_ease-out]">
-
         <div class="px-6 py-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
-
           <h3 id="formTitleMhs" class="text-lg font-bold text-slate-800">Tambah Data Mahasiswa</h3>
-
           <button onclick="tutupModalFormMhs()" class="text-slate-400 hover:text-red-500 transition cursor-pointer p-1">
-
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-
           </button>
-
         </div>
-
         <div class="p-6">
-
           <form id="formMahasiswa" class="space-y-4">
-
             <div><label class="block text-sm font-medium text-slate-600">NIM</label><input type="text" id="nim" required class="w-full mt-1 p-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 bg-white" placeholder="Contoh: 2201010001"></div>
-
             <div><label class="block text-sm font-medium text-slate-600">Nama Lengkap</label><input type="text" id="nama" required class="w-full mt-1 p-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 bg-white" placeholder="Nama Mahasiswa"></div>
-
             <div><label class="block text-sm font-medium text-slate-600">Jurusan</label><input type="text" id="jurusan" required class="w-full mt-1 p-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 bg-white" placeholder="Contoh: Teknik Komputer"></div>
-
             <div><label class="block text-sm font-medium text-slate-600">Angkatan</label><input type="text" id="angkatan" required class="w-full mt-1 p-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 bg-white" placeholder="Contoh: 2025"></div>
-
             <div class="flex gap-2 pt-4">
-
               <button type="button" onclick="tutupModalFormMhs()" class="flex-1 bg-slate-100 text-slate-600 py-2.5 px-4 rounded-lg hover:bg-slate-200 transition font-semibold cursor-pointer">Batal</button>
-
               <button type="submit" id="btnSubmitMhs" class="flex-1 bg-blue-600 text-white py-2.5 rounded-lg hover:bg-blue-700 transition font-semibold cursor-pointer shadow-md shadow-blue-500/30">Simpan</button>
-
             </div>
-
           </form>
-
         </div>
-
       </div>
-
     </div>
-
-
 
     <!-- MODAL POP-UP FORM DOSEN -->
-
     <div id="modalFormDosen" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 print:hidden transition-opacity">
-
       <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col animate-[slideIn_0.3s_ease-out]">
-
         <div class="px-6 py-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
-
           <h3 id="formTitleDosen" class="text-lg font-bold text-slate-800">Tambah Data Dosen</h3>
-
           <button onclick="tutupModalFormDosen()" class="text-slate-400 hover:text-red-500 transition cursor-pointer p-1">
-
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-
           </button>
-
         </div>
-
         <div class="p-6">
-
           <form id="formDosen" class="space-y-4">
-
             <div><label class="block text-sm font-medium text-slate-600">NIDN</label><input type="text" id="nidn" required class="w-full mt-1 p-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 bg-white" placeholder="Contoh: 0011223344"></div>
-
             <div><label class="block text-sm font-medium text-slate-600">Nama Dosen (Beserta Gelar)</label><input type="text" id="namaDosen" required class="w-full mt-1 p-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 bg-white" placeholder="Contoh: Dr. Alan Turing, M.Kom"></div>
-
             <div><label class="block text-sm font-medium text-slate-600">Bidang Keahlian</label><input type="text" id="keahlian" required class="w-full mt-1 p-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 bg-white" placeholder="Contoh: Rekayasa Perangkat Lunak"></div>
-
             <div class="flex gap-2 pt-4">
-
               <button type="button" onclick="tutupModalFormDosen()" class="flex-1 bg-slate-100 text-slate-600 py-2.5 px-4 rounded-lg hover:bg-slate-200 transition font-semibold cursor-pointer">Batal</button>
-
               <button type="submit" id="btnSubmitDosen" class="flex-1 bg-blue-600 text-white py-2.5 rounded-lg hover:bg-blue-700 transition font-semibold cursor-pointer shadow-md shadow-blue-500/30">Simpan</button>
-
             </div>
-
           </form>
-
         </div>
-
       </div>
-
     </div>
-
-
 
     <!-- MODAL POP-UP FORM MATKUL -->
-
     <div id="modalFormMatkul" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 print:hidden transition-opacity">
-
       <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col animate-[slideIn_0.3s_ease-out]">
-
         <div class="px-6 py-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
-
           <h3 id="formTitleMatkul" class="text-lg font-bold text-slate-800">Tambah Mata Kuliah</h3>
-
           <button onclick="tutupModalFormMatkul()" class="text-slate-400 hover:text-red-500 transition cursor-pointer p-1">
-
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-
           </button>
-
         </div>
-
         <div class="p-6">
-
           <form id="formMatkul" class="space-y-4">
-
             <div><label class="block text-sm font-medium text-slate-600">Kode Matkul</label><input type="text" id="kodeMatkul" required class="w-full mt-1 p-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 bg-white" placeholder="Contoh: TK102"></div>
-
             <div><label class="block text-sm font-medium text-slate-600">Nama Mata Kuliah</label><input type="text" id="namaMatkul" required class="w-full mt-1 p-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 bg-white" placeholder="Contoh: Arsitektur Komputer"></div>
-
             <div>
-
               <label class="block text-sm font-medium text-slate-600">Bobot SKS</label>
-
               <select id="bobotSks" required class="w-full mt-1 p-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 bg-white">
-
                 <option value="1">1 SKS</option><option value="2">2 SKS</option><option value="3" selected>3 SKS</option><option value="4">4 SKS</option>
-
               </select>
-
             </div>
-
             <div>
-
               <label class="block text-sm font-medium text-slate-600">Dosen Pengampu</label>
-
               <select id="dosenPengampu" required class="w-full mt-1 p-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 bg-white">
-
                 <option value="" disabled selected>-- Pilih Dosen --</option>
-
               </select>
-
             </div>
-
             <div class="flex gap-2 pt-4">
-
               <button type="button" onclick="tutupModalFormMatkul()" class="flex-1 bg-slate-100 text-slate-600 py-2.5 px-4 rounded-lg hover:bg-slate-200 transition font-semibold cursor-pointer">Batal</button>
-
               <button type="submit" id="btnSubmitMatkul" class="flex-1 bg-blue-600 text-white py-2.5 rounded-lg hover:bg-blue-700 transition font-semibold cursor-pointer shadow-md shadow-blue-500/30">Simpan</button>
-
             </div>
-
           </form>
-
         </div>
-
       </div>
-
     </div>
 
-
-
     <!-- MODAL POP-UP TRANSKRIP -->
-
     <div id="modalTranskrip" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 print:hidden transition-opacity">
-
-      <div class="bg-white rounded-2xl shadow-2xl w-full max-w-3xl overflow-hidden flex flex-col max-h-[90vh] animate-[slideIn_0.3s_ease-out]">
-
+      <div class="bg-white rounded-2xl shadow-2xl w-full max-w-5xl overflow-hidden flex flex-col max-h-[90vh] animate-[slideIn_0.3s_ease-out]">
         <div class="px-6 py-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
-
           <h3 class="text-lg font-bold text-slate-800">Transkrip Nilai Akademik</h3>
-
           <button onclick="closeModalTranskrip()" class="text-slate-400 hover:text-red-500 transition cursor-pointer p-1">
-
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-
           </button>
-
         </div>
-
         <div class="p-6 overflow-y-auto flex-1">
-
           <div class="flex flex-col md:flex-row justify-between mb-6 bg-blue-50/50 p-5 rounded-xl border border-blue-100">
-
             <div>
-
               <p class="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Nama Mahasiswa</p>
-
               <p id="modalNamaMhs" class="text-xl font-bold text-slate-900">-</p>
-
               <p id="modalNimMhs" class="text-sm font-mono text-blue-600 mt-1">-</p>
-
             </div>
-
             <div class="mt-4 md:mt-0 md:text-right border-t md:border-t-0 md:border-l border-blue-200 md:pl-6 pt-4 md:pt-0">
-
               <p class="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">IPK Kumulatif</p>
-
               <p id="modalIpkMhs" class="text-3xl font-black text-blue-600">0.00</p>
-
             </div>
-
           </div>
-
           <div class="border border-slate-200 rounded-xl overflow-x-auto w-full">
-            <table class="w-full bg-white text-sm min-w-[400px]">
+            <table class="w-full bg-white text-sm min-w-[700px]">
               <thead class="bg-slate-100 text-slate-700 text-left uppercase text-[10px]">
                 <tr>
-                  <th class="py-2 px-2">Kode</th>
+                  <th class="py-2 px-2 pl-3">Kode</th>
                   <th class="py-2 px-2">Matkul</th>
-                  <th class="py-2 px-2 text-center w-12">SKS</th>
-                  <th class="py-2 px-2 text-center">Angka</th>
+                  <th class="py-2 px-2 text-center">SKS</th>
+                  <th class="py-2 px-2 text-center">Tugas 1</th>
+                  <th class="py-2 px-2 text-center">Tugas 2</th>
+                  <th class="py-2 px-2 text-center">Kuis 1</th>
+                  <th class="py-2 px-2 text-center">Kuis 2</th>
+                  <th class="py-2 px-2 text-center">UTS</th>
+                  <th class="py-2 px-2 text-center">UAS</th>
+                  <th class="py-2 px-2 text-center">Akhir</th>
                   <th class="py-2 px-2 text-center">Huruf</th>
-                  <th class="py-2 px-2 text-center">Aksi</th>
+                  <th class="py-2 px-2 pr-3 text-center">Aksi</th>
                 </tr>
               </thead>
               <tbody id="modalTabelNilaiBody" class="divide-y divide-slate-100"></tbody>
             </table>
           </div>
-
         </div>
-
         <div class="px-6 py-4 border-t border-slate-200 bg-slate-50 flex justify-end gap-3">
-
           <button onclick="cetakPDF()" class="bg-blue-600 text-white px-5 py-2 rounded-lg font-semibold hover:bg-blue-700 transition shadow-md shadow-blue-500/30 flex items-center gap-2 cursor-pointer">
-
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M6.728 6.75h10.544a1.125 1.125 0 0 1 1.125 1.125v1.233a1.125 1.125 0 0 1-.329.805l-4.524 4.524a1.125 1.125 0 0 0-.329.805v3.134a1.125 1.125 0 0 1-1.688.977l-1.5-1.042A1.125 1.125 0 0 1 8.85 16.5v-3.134a1.125 1.125 0 0 0-.329-.805L4.04 8.913a1.125 1.125 0 0 1-.329-.805V7.875a1.125 1.125 0 0 1 1.125-1.125Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 6.75V3.75a.75.75 0 0 1 .75-.75h9a.75.75 0 0 1 .75.75v3" /></svg>
-
             Cetak Transkrip
-
           </button>
-
           <button onclick="closeModalTranskrip()" class="bg-slate-200 text-slate-700 px-5 py-2 rounded-lg font-semibold hover:bg-slate-300 transition cursor-pointer">Tutup</button>
-
         </div>
-
       </div>
-
     </div>
-
-
 
   </main>
 
-
-
   <script src="app.js"></script>
-
 </body>
-
 </html>

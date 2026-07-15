@@ -79,15 +79,26 @@ window.bukaModalTranskrip = function(nim) {
     const tbody = document.getElementById('modalTabelNilaiBody');
     tbody.innerHTML = '';
     nilai.forEach(n => {
+        // PERBAIKAN: Tarik kode dan sks dari Master Data Matkul berdasarkan nama matakuliah
+        const infoMatkul = dataMatkul.find(m => m.nama === n.matakuliah) || {};
+        const kode = infoMatkul.kode || '-';
+        const sks = infoMatkul.sks || '-';
+
         tbody.innerHTML += `
-            <tr class="text-slate-600">
-                <td class="py-2 px-2 border-b text-xs">${n.kodeMatkul}</td>
-                <td class="py-2 px-2 border-b text-xs truncate max-w-[100px]">${n.matakuliah}</td>
-                <td class="py-2 px-2 border-b text-center text-xs">${n.sks}</td>
-                <td class="py-2 px-2 border-b text-center text-xs">${n.nilaiAngka}</td>
-                <td class="py-2 px-2 border-b text-center font-bold text-xs">${n.nilaiHuruf}</td>
-                <td class="py-2 px-2 border-b text-center">
-                    <button onclick="hapusData('${n.id}', 'Input Nilai')" class="text-red-500 text-xs font-bold">Hapus</button>
+            <tr class="text-slate-600 hover:bg-slate-50 transition-colors">
+                <td class="py-2 px-2 border-b pl-3 text-[10px]">${kode}</td>
+                <td class="py-2 px-2 border-b text-[10px] truncate max-w-[120px]" title="${n.matakuliah}">${n.matakuliah}</td>
+                <td class="py-2 px-2 border-b text-center text-[10px]">${sks}</td>
+                <td class="py-2 px-2 border-b text-center text-[10px]">${n.t1 !== undefined && n.t1 !== "" ? n.t1 : '-'}</td>
+                <td class="py-2 px-2 border-b text-center text-[10px]">${n.t2 !== undefined && n.t2 !== "" ? n.t2 : '-'}</td>
+                <td class="py-2 px-2 border-b text-center text-[10px]">${n.k1 !== undefined && n.k1 !== "" ? n.k1 : '-'}</td>
+                <td class="py-2 px-2 border-b text-center text-[10px]">${n.k2 !== undefined && n.k2 !== "" ? n.k2 : '-'}</td>
+                <td class="py-2 px-2 border-b text-center text-[10px]">${n.uts !== undefined && n.uts !== "" ? n.uts : '-'}</td>
+                <td class="py-2 px-2 border-b text-center text-[10px]">${n.uas !== undefined && n.uas !== "" ? n.uas : '-'}</td>
+                <td class="py-2 px-2 border-b text-center text-[10px] font-bold text-slate-800">${n.nilaiAngka !== undefined ? n.nilaiAngka : '-'}</td>
+                <td class="py-2 px-2 border-b text-center font-bold text-xs text-blue-600">${n.nilaiHuruf !== undefined ? n.nilaiHuruf : '-'}</td>
+                <td class="py-2 px-2 pr-3 border-b text-center">
+                    <button onclick="hapusData('${n.id}', 'Input Nilai')" class="text-red-500 text-[10px] font-bold">Hapus</button>
                 </td>
             </tr>`;
     });
@@ -108,7 +119,8 @@ window.cetakPDF = () => {
             #modalTranskrip > div { box-shadow: none !important; max-width: 100% !important; max-height: none !important; border: none !important; }
             #modalTranskrip > div > div:first-child, #modalTranskrip > div > div:last-child { display: none !important; }
             #modalTranskrip .overflow-y-auto, #modalTranskrip .overflow-x-auto { overflow: visible !important; }
-            #modalTranskrip table th:nth-child(6), #modalTranskrip table td:nth-child(6) { display: none !important; }
+            /* Menyembunyikan kolom aksi (sekarang berada di kolom ke-12) */
+            #modalTranskrip table th:nth-child(12), #modalTranskrip table td:nth-child(12) { display: none !important; }
         }
     `;
     document.head.appendChild(style);
@@ -171,7 +183,92 @@ function renderTabelMatkul() {
 document.getElementById('formMahasiswa').addEventListener('submit', async(e) => { e.preventDefault(); await sendToGoogleSheets('data_mahasiswa', { id: Date.now(), nim: document.getElementById('nim').value, nama: document.getElementById('nama').value, jurusan: document.getElementById('jurusan').value, angkatan: document.getElementById('angkatan').value }); tutupModalFormMhs(); await ambilData(); });
 document.getElementById('formDosen').addEventListener('submit', async(e) => { e.preventDefault(); await sendToGoogleSheets('data_dosen', { id: Date.now(), nidn: document.getElementById('nidn').value, nama: document.getElementById('namaDosen').value, keahlian: document.getElementById('keahlian').value }); tutupModalFormDosen(); await ambilData(); });
 document.getElementById('formMatkul').addEventListener('submit', async(e) => { e.preventDefault(); await sendToGoogleSheets('master_matkul', { id: Date.now(), kode: document.getElementById('kodeMatkul').value, nama: document.getElementById('namaMatkul').value, sks: document.getElementById('bobotSks').value, namaDosen: document.getElementById('dosenPengampu').value }); tutupModalFormMatkul(); await ambilData(); });
-document.getElementById('formAkademik').addEventListener('submit', async(e) => { e.preventDefault(); const a = parseInt(document.getElementById('nilaiAngka').value); await sendToGoogleSheets('input_nilai', { id: Date.now(), nim: document.getElementById('selectMhs').value, matakuliah: document.getElementById('selectMatkul').value, nilaiAngka: a, nilaiHuruf: a >= 85 ? 'A' : a >= 75 ? 'B' : 'C' }); document.getElementById('formAkademik').reset(); await ambilData(); });
+
+// EVENT LISTENER UNTUK MENAMPILKAN NILAI SAAT INI (Jika sudah pernah diinput)
+function cekNilaiSekarang() {
+    const nim = document.getElementById('selectMhs').value;
+    const matkul = document.getElementById('selectMatkul').value;
+    const kategori = document.getElementById('kategoriNilai').value;
+    const inputBox = document.getElementById('inputNilaiAngka');
+    const infoBox = document.getElementById('infoStatusNilai');
+    
+    if (nim && matkul && kategori) {
+        const existing = dataNilai.find(n => n.nim == nim && n.matakuliah == matkul);
+        if (existing && existing[kategori] !== undefined && existing[kategori] !== "") {
+            inputBox.value = existing[kategori];
+            infoBox.innerHTML = `update nilai <b>${kategori.toUpperCase()}</b>. Nilai saat ini: <b>${existing[kategori]}</b>`;
+            infoBox.classList.remove('hidden');
+        } else {
+            inputBox.value = "";
+            infoBox.innerHTML = `Menginput nilai <b>${kategori.toUpperCase()}</b> baru.`;
+            infoBox.classList.remove('hidden');
+        }
+    } else {
+        infoBox.classList.add('hidden');
+    }
+}
+
+// Pasang pendeteksi perubahan pada dropdown
+document.getElementById('selectMhs').addEventListener('change', cekNilaiSekarang);
+document.getElementById('selectMatkul').addEventListener('change', cekNilaiSekarang);
+document.getElementById('kategoriNilai').addEventListener('change', cekNilaiSekarang);
+
+// EVENT LISTENER SIMPAN NILAI BERTAHAP
+document.getElementById('formAkademik').addEventListener('submit', async(e) => { 
+    e.preventDefault(); 
+    
+    const nim = document.getElementById('selectMhs').value;
+    const matkul = document.getElementById('selectMatkul').value;
+    const kategori = document.getElementById('kategoriNilai').value;
+    const inputVal = parseFloat(document.getElementById('inputNilaiAngka').value) || 0;
+    
+    // 1. Cari apakah baris nilai sudah ada sebelumnya
+    let existingRecord = dataNilai.find(n => n.nim == nim && n.matakuliah == matkul);
+    
+    // 2. Ambil nilai lama (jika ada), jika tidak ada anggap 0
+    let t1 = existingRecord && existingRecord.t1 ? parseFloat(existingRecord.t1) : 0;
+    let t2 = existingRecord && existingRecord.t2 ? parseFloat(existingRecord.t2) : 0;
+    let k1 = existingRecord && existingRecord.k1 ? parseFloat(existingRecord.k1) : 0;
+    let k2 = existingRecord && existingRecord.k2 ? parseFloat(existingRecord.k2) : 0;
+    let uts = existingRecord && existingRecord.uts ? parseFloat(existingRecord.uts) : 0;
+    let uas = existingRecord && existingRecord.uas ? parseFloat(existingRecord.uas) : 0;
+    
+    // 3. Timpa hanya komponen yang dipilih di dropdown dengan nilai baru
+    if (kategori === 't1') t1 = inputVal;
+    else if (kategori === 't2') t2 = inputVal;
+    else if (kategori === 'k1') k1 = inputVal;
+    else if (kategori === 'k2') k2 = inputVal;
+    else if (kategori === 'uts') uts = inputVal;
+    else if (kategori === 'uas') uas = inputVal;
+    
+    // 4. Kalkulasi ulang nilai akhir (Tugas 20%, Kuis 10%, UTS 30%, UAS 40%)
+    const rataTugas = (t1 + t2) / 2;
+    const rataKuis = (k1 + k2) / 2;
+    const nilaiAkhir = Math.round((rataTugas * 0.20) + (rataKuis * 0.10) + (uts * 0.30) + (uas * 0.40));
+    
+    let huruf = 'E';
+    if(nilaiAkhir >= 85) huruf = 'A';
+    else if(nilaiAkhir >= 75) huruf = 'B';
+    else if(nilaiAkhir >= 60) huruf = 'C';
+    else if(nilaiAkhir >= 50) huruf = 'D';
+
+    // 5. Gunakan ID lama (jika update) atau ID baru (jika pertama kali input)
+    const recordId = existingRecord ? existingRecord.id : Date.now();
+
+    await sendToGoogleSheets('input_nilai', { 
+        id: recordId, 
+        nim: nim, 
+        matakuliah: matkul, 
+        t1: t1, t2: t2, k1: k1, k2: k2, uts: uts, uas: uas,
+        nilaiAngka: nilaiAkhir, 
+        nilaiHuruf: huruf,
+        isUpdate: !!existingRecord // Penanda ke backend bahwa ini adalah proses UPDATE
+    }); 
+    
+    document.getElementById('formAkademik').reset();
+    document.getElementById('infoStatusNilai').classList.add('hidden');
+    await ambilData(); 
+});
 
 window.onload = () => ambilData();
 
